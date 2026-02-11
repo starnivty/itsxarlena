@@ -1,12 +1,8 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 
 export default function LoginPage() {
-  const sp = useSearchParams()
-  const callbackUrl = sp.get("callbackUrl") || "/admin/dashboard"
-
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [err, setErr] = useState<string | null>(null)
@@ -31,11 +27,12 @@ export default function LoginPage() {
       return
     }
 
-    window.location.href = callbackUrl
+    // selalu ke dashboard (tanpa callbackUrl)
+    window.location.href = "/admin/dashboard"
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
+     <div className="min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-2xl font-bold mb-6">Admin Login</h1>
         <form onSubmit={handleLogin} className="flex flex-col gap-3 max-w-sm">
         <input
@@ -58,5 +55,6 @@ export default function LoginPage() {
         {err && <p className="text-red-600 text-sm">{err}</p>}
         </form>
     </div>
+
   )
 }
