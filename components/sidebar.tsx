@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 const menu = [
   { name: "Dashboard", path: "/admin/dashboard" },
   { name: "Stores", path: "/admin/stores" },
-  { name: "Products", path: "/admin/products" },
+  { name: "Variants", path: "/admin/variants" },
 ]
 
 export default function Sidebar() {

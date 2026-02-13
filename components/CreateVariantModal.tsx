@@ -1,15 +1,15 @@
 "use client"
 
-import ProductForm from "@/components/ProductForm"
-import { ProductInput } from "@/lib/schema/product"
+import ProductForm from "@/components/VariantForm"
+import { VariantInput } from "@/lib/schema/variant"
 
 type Props = {
   onClose: () => void
-  onSubmit: (data: ProductInput) => Promise<void> | void
+  onSubmit: (data: VariantInput) => Promise<void> | void
 }
 
-export default function CreateProductModal({ onClose, onSubmit }: Props) {
-  async function handleCreate(data: ProductInput) {
+export default function CreateVariantModal({ onClose, onSubmit }: Props) {
+  async function handleCreate(data: VariantInput) {
     //const created = await createProduct(data)
     // onSubmit(created)
     await onSubmit(data)
@@ -27,7 +27,7 @@ export default function CreateProductModal({ onClose, onSubmit }: Props) {
       >
         {/* HEADER */}
         <div className="flex justify-between items-center border-b p-4">
-          <h2 className="font-semibold">Add Product</h2>
+          <h2 className="font-semibold">Add Variant</h2>
           <button onClick={onClose}>✕</button>
         </div>
 

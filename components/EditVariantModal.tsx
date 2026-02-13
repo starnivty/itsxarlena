@@ -1,21 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { Product } from "@/lib/api/products"
-import { ProductInput } from "@/lib/schema/product"
+import { Variant } from "@/lib/api/variants"
+import { VariantInput } from "@/lib/schema/variant"
 
 interface Props {
-  product: Product
+  variant: Variant
   onClose: () => void
-  onSubmit: (data: ProductInput) => Promise<void>
+  onSubmit: (data: VariantInput) => Promise<void>
 }
 
-export default function EditProductModal({ product, onClose, onSubmit }: Props) {
-  const [formData, setFormData] = useState<ProductInput>({
-    category: product.category,
-    name: product.name,
-    price: product.price,
-    stock: product.stock
+export default function EditVariantModal({ variant, onClose, onSubmit }: Props) {
+  const [formData, setFormData] = useState<VariantInput>({
+    product: variant.product,
+    name: variant.name,
+    price: variant.price,
+    stock: variant.stock
   })
   const [loading, setLoading] = useState(false)
 
@@ -27,7 +27,7 @@ export default function EditProductModal({ product, onClose, onSubmit }: Props) 
       await onSubmit(formData)
       onClose()
     } catch (error) {
-      console.error("Failed to update product:", error)
+      console.error("Failed to update variant:", error)
     } finally {
       setLoading(false)
     }
@@ -36,15 +36,15 @@ export default function EditProductModal({ product, onClose, onSubmit }: Props) 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-white p-6 rounded w-96">
-        <h2 className="text-lg font-bold mb-4">Edit Product</h2>
+        <h2 className="text-lg font-bold mb-4">Edit Variant</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
+            <label className="block text-sm font-medium mb-1">Product</label>
             <input
               type="text"
-              value={formData.category}
-              onChange={e => setFormData({ ...formData, category: e.target.value })}
+              value={formData.product}
+              onChange={e => setFormData({ ...formData, product: e.target.value })}
               className="w-full border px-3 py-2"
               required
             />

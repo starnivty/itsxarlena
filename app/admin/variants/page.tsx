@@ -2,25 +2,25 @@
 
 import { useEffect, useState } from "react"
 import {
-  getProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  Product
-} from "@/lib/api/products"
-import { ProductInput } from "@/lib/schema/product"
-import CreateProductModal from "@/components/CreateProductModal"
-import EditProductModal from "@/components/EditProductModal"
+  getVariants,
+  createVariant,
+  updateVariant,
+  deleteVariant,
+  Variant,
+} from "@/lib/api/variants"
+import { VariantInput } from "@/lib/schema/variant"
+import CreateVariantModal from "@/components/CreateVariantModal"
+import EditVariantModal from "@/components/EditVariantModal"
 
 const ITEMS_PER_PAGE = 10
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([])
+export default function VariantsPage() {
+  const [variants, setVariants] = useState<Variant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const [showCreate, setShowCreate] = useState(false)
-  const [editing, setEditing] = useState<Product | null>(null)
+  const [editing, setEditing] = useState<Variant | null>(null)
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -29,8 +29,8 @@ export default function ProductsPage() {
   // INITIAL FETCH
   // =============================
   useEffect(() => {
-    getProducts()
-      .then(setProducts)
+    getVariants()
+      .then(setVariants)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -38,27 +38,27 @@ export default function ProductsPage() {
   // =============================
   // OPTIMISTIC CREATE
   // =============================
-  async function handleCreate(data: ProductInput) {
+  async function handleCreate(data: VariantInput) {
     const tempId = Date.now()
 
-    const optimistic: Product = {
+    const optimistic: Variant = {
       id: tempId,
       ...data
     }
 
     // 1️⃣ optimistic add
-    setProducts(prev => [...prev, optimistic])
+    setVariants(prev => [...prev, optimistic])
 
     try {
-      const created = await createProduct(data)
+      const created = await createVariant(data)
 
       // 2️⃣ replace temp with real
-      setProducts(prev =>
+      setVariants(prev =>
         prev.map(p => (p.id === tempId ? created : p))
       )
     } catch (e: any) {
       // 3️⃣ rollback
-      setProducts(prev => prev.filter(p => p.id !== tempId))
+      setVariants(prev => prev.filter(p => p.id !== tempId))
       alert(e.message)
     }
   }
@@ -66,26 +66,26 @@ export default function ProductsPage() {
   // =============================
   // OPTIMISTIC UPDATE
   // =============================
-  async function handleUpdate(id: number, data: ProductInput) {
-    const previous = products
+  async function handleUpdate(id: number, data: VariantInput) {
+    const previous = variants
 
     // 1️⃣ optimistic update
-    setProducts(prev =>
+    setVariants(prev =>
       prev.map(p =>
         p.id === id ? { ...p, ...data } : p
       )
     )
 
     try {
-      const updated = await updateProduct(id, data)
+      const updated = await updateVariant(id, data)
 
       // 2️⃣ sync server result
-      setProducts(prev =>
+      setVariants(prev =>
         prev.map(p => (p.id === updated.id ? updated : p))
       )
     } catch (e: any) {
       // 3️⃣ rollback
-      setProducts(previous)
+      setVariants(previous)
       alert(e.message)
     }
   }
@@ -109,10 +109,10 @@ export default function ProductsPage() {
   }
 
   function toggleSelectAll() {
-    if (selected.size === products.length) {
+    if (selected.size === variants.length) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(products.map(p => p.id as number)))
+      setSelected(new Set(variants.map(p => p.id as number)))
     }
   }
 
@@ -120,18 +120,18 @@ export default function ProductsPage() {
   // OPTIMISTIC DELETE (SINGLE)
   // =============================
   async function handleDelete(id: number) {
-    if (!confirm("Delete this product?")) return
+    if (!confirm("Delete this variant?")) return
 
-    const previous = products
+    const previous = variants
 
     // 1️⃣ optimistic remove
-    setProducts(prev => prev.filter(p => p.id !== id))
+    setVariants(prev => prev.filter(p => p.id !== id))
 
     try {
-      await deleteProduct(id)
+      await deleteVariant(id)
     } catch (e: any) {
       // 2️⃣ rollback
-      setProducts(previous)
+      setVariants(previous)
       alert(e.message)
     }
   }
@@ -140,21 +140,21 @@ export default function ProductsPage() {
   // OPTIMISTIC DELETE (BULK)
   // =============================
   async function handleBulkDelete() {
-    if (!confirm(`Delete ${selected.size} product(s)? This cannot be undone.`)) return
+    if (!confirm(`Delete ${selected.size} variant(s)? This cannot be undone.`)) return
 
-    const previous = products
+    const previous = variants
     const idsToDelete = Array.from(selected)
 
     // 1️⃣ optimistic remove
-    setProducts(prev => prev.filter(p => !selected.has(p.id as number)))
+    setVariants(prev => prev.filter(p => !selected.has(p.id as number)))
     setSelected(new Set())
 
     try {
       // 2️⃣ delete all selected
-      await Promise.all(idsToDelete.map(id => deleteProduct(id)))
+      await Promise.all(idsToDelete.map(id => deleteVariant(id)))
     } catch (e: any) {
       // 3️⃣ rollback
-      setProducts(previous)
+      setVariants(previous)
       alert(e.message)
     }
   }
@@ -165,15 +165,15 @@ export default function ProductsPage() {
   // =============================
   // SEARCH & PAGINATION
   // =============================
-  const filtered = products.filter(p =>
+  const filtered = variants.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    p.product.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedProducts = filtered.slice(startIndex, endIndex)
+  const paginatedVariants = filtered.slice(startIndex, endIndex)
 
   // Reset to page 1 when search changes
   if (currentPage > totalPages && totalPages > 0) {
@@ -183,10 +183,10 @@ export default function ProductsPage() {
   return (
     <div className="space-y-4 text-black">
       <div className="flex justify-between items-center gap-4">
-        <h1 className="text-xl font-semibold">Products</h1>
+        <h1 className="text-xl font-semibold">Variants</h1>
         <input
           type="text"
-          placeholder="Search by name or category..."
+          placeholder="Search by variant name or product name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="px-3 py-1 border border-gray-300 rounded flex-1 max-w-xs"
@@ -204,7 +204,7 @@ export default function ProductsPage() {
             onClick={() => setShowCreate(true)}
             className="px-3 py-1 bg-black text-white hover:bg-gray-800"
           >
-            Add Product
+            Add Variant
           </button>
         </div>
       </div>
@@ -215,12 +215,12 @@ export default function ProductsPage() {
             <th className="border p-2 text-center w-10">
               <input
                 type="checkbox"
-                checked={selected.size === products.length && products.length > 0}
+                checked={selected.size === variants.length && variants.length > 0}
                 onChange={toggleSelectAll}
                 className="cursor-pointer"
               />
             </th>
-            <th className="border p-2">Category</th>
+            <th className="border p-2">Product</th>
             <th className="border p-2 text-left">Name</th>
             <th className="border p-2 text-left">Price</th>
             <th className="border p-2 text-left">Stock</th>
@@ -228,7 +228,7 @@ export default function ProductsPage() {
           </tr>
         </thead>
         <tbody>
-          {paginatedProducts.map(p => (
+          {paginatedVariants.map(p => (
             <tr key={p.id} className={selected.has(p.id as number) ? "bg-blue-50" : ""}>
               <td className="border p-2 text-center">
                 <input
@@ -238,7 +238,7 @@ export default function ProductsPage() {
                   className="cursor-pointer"
                 />
               </td>
-              <td className="border p-2">{p.category}</td>
+              <td className="border p-2">{p.product}</td>
               <td className="border p-2">{p.name}</td>
               <td className="border p-2">{p.price}</td>
               <td className="border p-2">{p.stock}</td>
@@ -265,7 +265,7 @@ export default function ProductsPage() {
       {totalPages > 1 && (
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            Showing {paginatedProducts.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length}
+            Showing {paginatedVariants.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length}
           </div>
           <div className="space-x-1 flex">
             <button
@@ -301,7 +301,7 @@ export default function ProductsPage() {
 
       {/* CREATE MODAL */}
       {showCreate && (
-        <CreateProductModal
+        <CreateVariantModal
           onClose={() => setShowCreate(false)}
           onSubmit={handleCreate}
         />
@@ -309,8 +309,8 @@ export default function ProductsPage() {
 
       {/* EDIT MODAL */}
       {editing && (
-        <EditProductModal
-          product={editing}
+        <EditVariantModal
+          variant={editing}
           onClose={() => setEditing(null)}
           onSubmit={data => handleUpdate(editing.id, data)}
         />

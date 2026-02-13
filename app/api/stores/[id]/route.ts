@@ -11,9 +11,9 @@ export async function DELETE(request: Request) {
   }
 
   const { data: deleted, error } = await supabase
-    .from("stores")        // atau "products"
+    .from("stores")        
     .delete()
-    .eq("store_id", id)            // ganti ke "id" kalau kolomnya id
+    .eq("store_id", id)            
     .select(`
         store_id,
         store_name,

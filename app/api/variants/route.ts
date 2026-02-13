@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase/server"
-import { productSchema } from "@/lib/schema/product"
+import { variantSchema } from "@/lib/schema/variant"
 
 export async function GET() {
   const { data, error } = await supabase
@@ -18,7 +18,7 @@ export async function GET() {
 
   const mappedData = data.map((item) => ({
     id: item.variant_id,
-    category: item.category,
+    product: item.product,
     name: item.variant_name,
     price: item.price,
     stock: item.stock,
@@ -30,18 +30,18 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const data = productSchema.parse(body)
+    const data = variantSchema.parse(body)
 
     const { data: product, error: productError } = await supabase
       .from("products")
       .select("product_id")
-      .eq("product_name", data.category)
+      .eq("product_name", data.product)
       .single()
 
     if (productError) {
       // kalau tidak ketemu biasanya error dari .single()
       return NextResponse.json(
-        { message: "Product not found for given category/name" },
+        { message: "Product not found for given product name" },
         { status: 404 }
       )
     }
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         id: newVariant.variant_id,
-        category: newVariant.products?.[0]?.product_name || data.category,
+        product: newVariant.products?.[0]?.product_name || data.product,
         name: newVariant.variant_name,
         price: newVariant.price,
         stock: newVariant.stock,

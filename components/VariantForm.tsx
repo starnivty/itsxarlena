@@ -1,18 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ProductInput } from "@/lib/schema/product"
+import { VariantInput } from "@/lib/schema/variant"
 
 type Props = {
-  defaultValues?: ProductInput
+  defaultValues?: VariantInput
   submitLabel: string
-  onSubmit: (data: ProductInput) => Promise<void> | void
+  onSubmit: (data: VariantInput) => Promise<void> | void
   onCancel: () => void
 }
 
-export default function ProductForm({
+export default function VariantForm({
   defaultValues = {
-    category: "",
+    product: "",
     name: "",
     price: 0,
     stock: 0,
@@ -21,7 +21,7 @@ export default function ProductForm({
   onSubmit,
   onCancel,
 }: Props) {
-  const [form, setForm] = useState<ProductInput>(defaultValues)
+  const [form, setForm] = useState<VariantInput>(defaultValues)
   const [categories, setCategories] = useState<string[]>([])
   const [loadingCategories, setLoadingCategories] = useState(false)
   const [categoriesError, setCategoriesError] = useState<string | null>(null)
@@ -59,10 +59,10 @@ export default function ProductForm({
       ) : (
         <select
           className="border p-2 w-full"
-          value={form.category}
-          onChange={e => setForm({ ...form, category: e.target.value })}
+          value={form.product}
+          onChange={e => setForm({ ...form, product: e.target.value })}
         >
-          <option value="">Select category</option>
+          <option value="">Select product</option>
           {categories.map(c => (
             <option key={c} value={c}>
               {c}

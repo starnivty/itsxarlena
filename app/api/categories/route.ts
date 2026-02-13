@@ -14,13 +14,13 @@ export async function GET() {
   }
 
   const mappedData = data.map((item) => ({
-    category: item.product_name,
+    product: item.product_name,
   }))
 
-  // ambil unique category
-  const categories = Array.from(
-    new Set(mappedData.map(item => item.category))
+  // ambil unique product
+  const products = Array.from(
+    new Set(mappedData.map(item => item.product))
   )
 
-  return NextResponse.json(categories)
+  return NextResponse.json(products)
 }

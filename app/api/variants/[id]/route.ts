@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase/server"
-import { productSchema } from "@/lib/schema/product"
+import { variantSchema } from "@/lib/schema/variant"
 
 export async function DELETE(request: Request) {
   const url = new URL(request.url)
@@ -47,20 +47,20 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json()
-    const data = productSchema.parse(body)
+    const data = variantSchema.parse(body)
 
-    // 1) Resolve product_id dari "category" (nama product)
+    // 1) Resolve product_id dari "product" (nama product)
     // Ganti "name" sesuai kolom di tabel products kamu (misal: product_name, title, etc.)
     const { data: product, error: productError } = await supabase
       .from("products")
       .select("product_id")
-      .eq("product_name", data.category)
+      .eq("product_name", data.product)
       .single()
 
     if (productError) {
       // kalau tidak ketemu biasanya error dari .single()
       return NextResponse.json(
-        { message: "Product not found for given category/name" },
+        { message: "Variant not found for given product name" },
         { status: 404 }
       )
     }

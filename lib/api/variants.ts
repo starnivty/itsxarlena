@@ -1,27 +1,27 @@
-export type Product = {
+export type Variant = {
   id: number
-  category: string
+  product: string
   name: string
   price: number
   stock: number
 }
 
-const BASE_URL = "/api/products"
+const BASE_URL = "/api/variants"
 
-export async function getProducts(): Promise<Product[]> {
+export async function getVariants(): Promise<Variant[]> {
   const res = await fetch(BASE_URL)
 
   if (!res.ok) {
-    throw new Error("Failed to fetch products")
+    throw new Error("Failed to fetch variants")
   }
 
   return res.json()
 }
 
-export async function updateProduct(
+export async function updateVariant(
   id: number,
-  data: Omit<Product, "id">
-): Promise<Product> {
+  data: Omit<Variant, "id">
+): Promise<Variant> {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
@@ -38,23 +38,23 @@ export async function updateProduct(
   return res.json()
 }
 
-export async function deleteProduct(id: number): Promise<Product> {
+export async function deleteVariant(id: number): Promise<Variant> {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE"
   })
 
   if (!res.ok) {
     const err = await res.json()
-    throw new Error(err.message ?? "Failed to delete product")
+    throw new Error(err.message ?? "Failed to delete variant")
   }
 
   return res.json()
 }
 
-export async function createProduct(
-  data: Omit<Product, "id">
-): Promise<Product> {
-  const res = await fetch("/api/products", {
+export async function createVariant(
+  data: Omit<Variant, "id">
+): Promise<Variant> {
+  const res = await fetch(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -64,7 +64,7 @@ export async function createProduct(
 
   if (!res.ok) {
     const err = await res.json()
-    throw new Error(err.message ?? "Failed to create product")
+    throw new Error(err.message ?? "Failed to create variant")
   }
 
   return res.json()

@@ -195,7 +195,7 @@ export default function StoresPage() {
         <h1 className="text-xl font-semibold">Stores</h1>
         <input
           type="text"
-          placeholder="Search by name or category..."
+          placeholder="Search by name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="px-3 py-1 border border-gray-300 rounded flex-1 max-w-xs"
