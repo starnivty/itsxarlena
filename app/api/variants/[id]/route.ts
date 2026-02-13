@@ -48,41 +48,115 @@ export async function PUT(req: Request) {
     const body = await req.json()
     const data = variantSchema.parse(body)
 
-    // 1) Resolve product_id dari "product" (nama product)
-    // Ganti "name" sesuai kolom di tabel products kamu (misal: product_name, title, etc.)
+    // 1) cari store_id berdasarkan store_name
+    const { data: store, error: storeError } = await supabase
+      .from("stores")
+      .select("store_id")
+      .eq("store_name", data.store)
+      .single()
+
+    if (storeError || !store) {
+      return NextResponse.json(
+        { message: "Store not found for given store name" },
+        { status: 404 }
+      )
+    }
+
+    // 2) cari product_id berdasarkan product_name
     const { data: product, error: productError } = await supabase
       .from("products")
       .select("product_id")
       .eq("product_name", data.product)
       .single()
 
-    if (productError) {
-      // kalau tidak ketemu biasanya error dari .single()
+    if (productError || !product) {
       return NextResponse.json(
-        { message: "Variant not found for given product name" },
+        { message: "Product not found for given product name" },
         { status: 404 }
       )
     }
 
-    console.log("hasil data :", data)
+    // 3) pastikan variant ada (biar 404 bener)
+    const { data: existingVariant, error: existingErr } = await supabase
+      .from("product_variants")
+      .select("variant_id")
+      .eq("variant_id", id)
+      .single()
 
-    // 2) Update variant pakai product_id yang sudah ketemu
-    const { data: updatedVariant, error } = await supabase
+    if (existingErr || !existingVariant) {
+      return NextResponse.json({ message: "Variant not found" }, { status: 404 })
+    }
+
+    // 4) update variant (TANPA price, karena price ada di store_product_prices)
+    const { data: updatedVariant, error: variantErr } = await supabase
       .from("product_variants")
       .update({
         variant_name: data.name,
-        price: data.price,
         product_id: product.product_id,
       })
       .eq("variant_id", id)
-      .select()
+      .select(`
+        variant_id,
+        variant_name,
+        product_id,
+        products!inner (
+          product_name
+        )
+      `)
       .single()
 
-    if (error) {
-      return NextResponse.json({ message: error.message }, { status: 400 })
+    if (variantErr || !updatedVariant) {
+      return NextResponse.json(
+        { message: variantErr?.message ?? "Failed to update variant" },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json(updatedVariant)
+    // 5) upsert price per store (butuh unique constraint di (store_id, variant_id))
+    const { data: upsertedPrice, error: priceErr } = await supabase
+      .from("store_product_prices")
+      .upsert(
+        {
+          store_id: store.store_id,
+          variant_id: updatedVariant.variant_id,
+          price: data.price,
+          currency: "IDR",
+        },
+        {
+          onConflict: "store_id,variant_id",
+        }
+      )
+      .select(`
+        store_product_id,
+        store_id,
+        stores!inner (
+          store_name
+        ),
+        variant_id,
+        price,
+        currency
+      `)
+      .single()
+
+    if (priceErr || !upsertedPrice) {
+      return NextResponse.json(
+        { message: priceErr?.message ?? "Failed to update store price" },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      {
+        id: updatedVariant.variant_id,
+        product: updatedVariant.products?.[0]?.product_name || data.product,
+        store: upsertedPrice.stores?.[0]?.store_name || data.store,
+        name: updatedVariant.variant_name,
+        price: upsertedPrice.price,
+        currency: upsertedPrice.currency,
+        store_product_id: upsertedPrice.store_product_id,
+      },
+      { status: 200 }
+    )
   } catch (err: any) {
     return NextResponse.json(
       { message: err.errors?.[0]?.message ?? "Invalid input" },
@@ -90,4 +164,5 @@ export async function PUT(req: Request) {
     )
   }
 }
+
 
