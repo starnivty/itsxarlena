@@ -76,25 +76,40 @@ export async function PUT(req: Request) {
       )
     }
 
-    // 3) pastikan variant ada (biar 404 bener)
+    // 3) cari variant_id berdasarkan variant_name
+    const { data: variant, error: variantError } = await supabase
+      .from("product_variants")
+      .select("variant_id, variant_name, product_id")
+      .eq("variant_name", data.name)
+      .maybeSingle()
+
+    if (variantError || !variant) {
+      return NextResponse.json(
+        { message: "Variant not found for given variant name" },
+        { status: 404 }
+      )
+    }
+
+
+    // 4) pastikan variant ada (biar 404 bener)
     const { data: existingVariant, error: existingErr } = await supabase
       .from("product_variants")
       .select("variant_id")
-      .eq("variant_id", id)
+      .eq("variant_id", variant.variant_id)
       .single()
 
     if (existingErr || !existingVariant) {
       return NextResponse.json({ message: "Variant not found" }, { status: 404 })
     }
 
-    // 4) update variant (TANPA price, karena price ada di store_product_prices)
+    // 5) update variant (TANPA price, karena price ada di store_product_prices)
     const { data: updatedVariant, error: variantErr } = await supabase
       .from("product_variants")
       .update({
         variant_name: data.name,
         product_id: product.product_id,
       })
-      .eq("variant_id", id)
+      .eq("variant_id", variant.variant_id)
       .select(`
         variant_id,
         variant_name,
