@@ -8,6 +8,9 @@ const menu = [
   { name: "Dashboard", path: "/admin/dashboard" },
   { name: "Stores", path: "/admin/stores" },
   { name: "Variants", path: "/admin/variants" },
+  { name: "Products", path: "/admin/products" },
+  { name: "Categories", path: "/admin/categories" },
+  { name: "Sub Categories", path: "/admin/sub-categories" },
 ]
 
 export default function Sidebar() {

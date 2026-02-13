@@ -18,7 +18,6 @@ export async function DELETE(request: Request) {
       variant_id,
       variant_name,
       price,
-      stock,
       product_id,
       products ( product_name )
     `)
@@ -73,7 +72,6 @@ export async function PUT(req: Request) {
       .update({
         variant_name: data.name,
         price: data.price,
-        stock: data.stock,
         product_id: product.product_id,
       })
       .eq("variant_id", id)

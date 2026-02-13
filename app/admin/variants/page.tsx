@@ -220,10 +220,10 @@ export default function VariantsPage() {
                 className="cursor-pointer"
               />
             </th>
+            <th className="border p-2">Store</th>
             <th className="border p-2">Product</th>
             <th className="border p-2 text-left">Name</th>
             <th className="border p-2 text-left">Price</th>
-            <th className="border p-2 text-left">Stock</th>
             <th className="border p-2" />
           </tr>
         </thead>
@@ -238,10 +238,10 @@ export default function VariantsPage() {
                   className="cursor-pointer"
                 />
               </td>
+              <td className="border p-2">{p.store}</td>
               <td className="border p-2">{p.product}</td>
               <td className="border p-2">{p.name}</td>
               <td className="border p-2">{p.price}</td>
-              <td className="border p-2">{p.stock}</td>
               <td className="border p-2 space-x-2">
                 <button
                   onClick={() => setEditing(p)}

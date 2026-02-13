@@ -17,11 +17,11 @@ export async function GET() {
   }
 
   const mappedData = data.map((item) => ({
-    id: item.variant_id,
-    product: item.product,
+    id: item.store_product_id,
+    store: item.store_name,
+    product: item.product_name,
     name: item.variant_name,
     price: item.price,
-    stock: item.stock,
   }))
 
   return NextResponse.json(mappedData)
@@ -51,14 +51,12 @@ export async function POST(req: Request) {
       .insert({
         variant_name: data.name,
         price: data.price,
-        stock: data.stock,
         product_id: product.product_id,
       })
       .select(`
         variant_id,
         variant_name,
         price,
-        stock,
         product_id,
         products!inner (
           product_name
@@ -76,7 +74,6 @@ export async function POST(req: Request) {
         product: newVariant.products?.[0]?.product_name || data.product,
         name: newVariant.variant_name,
         price: newVariant.price,
-        stock: newVariant.stock,
       },
       { status: 201 }
     )

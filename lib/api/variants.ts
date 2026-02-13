@@ -1,9 +1,9 @@
 export type Variant = {
   id: number
+  store: string
   product: string
   name: string
   price: number
-  stock: number
 }
 
 const BASE_URL = "/api/variants"

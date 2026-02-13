@@ -12,19 +12,41 @@ type Props = {
 
 export default function VariantForm({
   defaultValues = {
+    store: "",
     product: "",
     name: "",
     price: 0,
-    stock: 0,
   },
   submitLabel,
   onSubmit,
   onCancel,
 }: Props) {
   const [form, setForm] = useState<VariantInput>(defaultValues)
+  const [stores, setStores] = useState<{ id: string; name: string; admin_wa: string; pricelist_url: string }[]>([])
+  const [loadingStore, setLoadingStore] = useState(false)
+  const [storesError, setStoresError] = useState<string | null>(null)
   const [categories, setCategories] = useState<string[]>([])
   const [loadingCategories, setLoadingCategories] = useState(false)
   const [categoriesError, setCategoriesError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    setLoadingStore(true)
+    fetch("/api/stores")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load stores")
+        return res.json()
+      })
+      .then((data) => {
+        if (mounted) setStores(data)
+      })
+      .catch(e => {
+        if (mounted) setStoresError(e.message)
+      })
+      .finally(() => mounted && setLoadingStore(false))
+
+    return () => { mounted = false }
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -52,6 +74,25 @@ export default function VariantForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {loadingStore ? (
+        <p>Loading stores...</p>
+      ) : storesError ? (
+        <p className="text-red-500">{storesError}</p>
+      ) : (
+        <select
+          className="border p-2 w-full"
+          value={form.store}
+          onChange={e => setForm({ ...form, store: e.target.value })}
+        >
+          <option value="">Select store</option>
+          {stores.map(s => (
+            <option key={s.id} value={s.name}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      )}
+
       {loadingCategories ? (
         <p>Loading categories...</p>
       ) : categoriesError ? (
@@ -85,16 +126,6 @@ export default function VariantForm({
         value={form.price}
         onChange={e =>
           setForm({ ...form, price: Number(e.target.value) })
-        }
-      />
-
-      <input
-        className="border p-2 w-full"
-        type="number"
-        placeholder="Stock"
-        value={form.stock}
-        onChange={e =>
-          setForm({ ...form, stock: Number(e.target.value) })
         }
       />
 
