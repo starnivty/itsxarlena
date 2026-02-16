@@ -1,11 +1,5 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold">
-        CMS Dashboard
-      </h1>
-    </main>
-  )
+  redirect("/login");
 }
